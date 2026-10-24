@@ -137,14 +137,11 @@ export function plaqueCanvas(mem, label) {
   ctx.strokeRect(7, 7, W - 14, H - 14);
   ctx.textAlign = 'center';
   ctx.fillStyle = '#7a5b30';
-  ctx.font = '500 16px Inter, sans-serif';
-  ctx.fillText(label, W / 2, 38);
+  ctx.font = '500 18px Inter, sans-serif';
+  ctx.fillText(label, W / 2, 54);
   ctx.fillStyle = '#2b2118';
-  ctx.font = `600 30px ${SERIF}`;
-  ctx.fillText(wrapText(ctx, mem.title, W - 40)[0], W / 2, 80);
-  ctx.fillStyle = '#7a5b30';
-  ctx.font = `italic 22px ${SERIF}`;
-  ctx.fillText(mem.date, W / 2, 116);
+  ctx.font = `600 32px ${SERIF}`;
+  ctx.fillText(wrapText(ctx, mem.title, W - 40)[0], W / 2, 104);
   return c;
 }
 

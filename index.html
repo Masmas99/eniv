@@ -137,23 +137,17 @@
     </div>
   </div>
 
-  <!-- Modal detail kenangan (lukisan) -->
+  <!-- Modal foto kenangan (tanpa penjelasan, hanya foto) -->
   <div id="memoryModal" class="overlay hidden">
-    <div class="modal-card">
+    <div class="modal-photo-only">
       <button type="button" class="close" id="memClose" aria-label="Tutup">&times;</button>
       <div class="modal-image">
         <img id="memImg" alt="" />
       </div>
-      <div class="modal-text">
-        <p class="eyebrow" id="memIndex"></p>
-        <h2 id="memTitle"></h2>
-        <p class="date" id="memDate"></p>
-        <p class="desc" id="memDesc"></p>
-        <div class="nav">
-          <button type="button" id="prevBtn">&larr; Sebelumnya</button>
-          <button type="button" id="nextBtn">Berikutnya &rarr;</button>
-        </div>
+      <div class="photo-controls">
+        <button type="button" class="nav-btn" id="prevBtn">&larr; Sebelumnya</button>
         <button type="button" id="memBack" class="btn-primary">Kembali Berjalan</button>
+        <button type="button" class="nav-btn" id="nextBtn">Berikutnya &rarr;</button>
       </div>
     </div>
   </div>
@@ -163,6 +157,17 @@
     <div class="letter-card">
       <button type="button" class="close" id="letterClose" aria-label="Tutup">&times;</button>
       <div class="letter-paper">
+        <!-- Galeri kenangan 2024–2026 yang bergerak bergantian (muncul di atas ucapan ulang tahun) -->
+        <div id="letterMemories" class="letter-memories hidden">
+          <div class="slide-stage">
+            <img id="slideImgA" class="slide-img active" alt="" />
+            <img id="slideImgB" class="slide-img" alt="" />
+          </div>
+          <div class="filmstrip-wrap">
+            <div class="filmstrip-track" id="filmstripTrack"></div>
+          </div>
+        </div>
+
         <p class="eyebrow" id="letterEyebrow">Untuk Kamu</p>
         <h2 id="letterTitle"></h2>
         <div class="letter-body" id="letterBody"></div>

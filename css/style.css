@@ -429,95 +429,79 @@ input[type="text"]:focus { border-color: var(--gold); }
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
 }
 
-/* ---------- Modal Kenangan ---------- */
-.modal-card {
+/* ---------- Modal Foto Kenangan (Hanya Foto, Tanpa Penjelasan) ---------- */
+.modal-photo-only {
   position: relative;
-  display: grid;
-  grid-template-columns: 1.25fr 1fr;
-  width: min(980px, 100%);
-  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: min(860px, 100%);
+  max-height: 92vh;
+  padding: 14px;
   background: var(--bg);
   border: 1px solid var(--gold-soft);
   border-radius: 18px;
-  overflow: hidden;
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.65);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7);
 }
 .modal-image {
+  width: 100%;
   background: #050403;
+  border-radius: 12px;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 220px;
 }
 .modal-image img {
   width: 100%;
-  height: 100%;
-  max-height: 90vh;
+  height: auto;
+  max-height: 74vh;
   object-fit: contain;
+  display: block;
 }
-.modal-text {
-  padding: 28px 26px 22px;
+.photo-controls {
   display: flex;
-  flex-direction: column;
-  overflow-y: auto;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  margin-top: 12px;
 }
-.modal-text h2 {
-  font-family: 'Cormorant Garamond', Georgia, serif;
-  font-weight: 600;
-  font-size: clamp(26px, 3.6vw, 38px);
-  line-height: 1.1;
-  margin: 8px 0 4px;
-}
-.modal-text .date {
-  font-family: 'Cormorant Garamond', Georgia, serif;
-  font-style: italic;
-  color: var(--gold);
-  font-size: 18px;
-  margin-bottom: 14px;
-}
-.modal-text .desc {
-  color: var(--muted);
-  line-height: 1.75;
-  font-size: 14px;
-  font-weight: 300;
-  flex: 1;
-  white-space: pre-line;
-}
-.modal-text .nav {
-  display: flex;
-  gap: 8px;
-  margin: 18px 0 10px;
-}
-.modal-text .nav button {
+.nav-btn {
   cursor: pointer;
-  flex: 1;
-  padding: 9px 10px;
+  padding: 11px 18px;
   border-radius: 999px;
   border: 1px solid var(--gold-soft);
-  background: transparent;
+  background: rgba(255, 255, 255, 0.04);
   color: var(--ink);
-  font: 400 12px 'Inter', sans-serif;
+  font: 500 12px 'Inter', sans-serif;
+  transition: background 0.18s;
 }
-.modal-text .nav button:hover { background: rgba(216, 178, 106, 0.14); }
+.nav-btn:hover { background: rgba(216, 178, 106, 0.16); }
 
 .close {
   position: absolute;
   top: 10px; right: 14px;
   z-index: 2;
   cursor: pointer;
-  font-size: 28px;
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  font-size: 24px;
   line-height: 1;
-  background: none;
-  border: none;
-  color: var(--muted);
+  background: rgba(10, 8, 6, 0.7);
+  border: 1px solid var(--gold-soft);
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-.close:hover { color: var(--ink); }
+.close:hover { background: rgba(216, 178, 106, 0.25); }
 
 /* ---------- Modal Surat ---------- */
 .letter-card {
   position: relative;
-  width: min(560px, 100%);
-  max-height: 90vh;
+  width: min(640px, 100%);
+  max-height: 92vh;
   overflow-y: auto;
   border-radius: 18px;
   background: linear-gradient(180deg, #241b15, #17110d);
@@ -525,7 +509,7 @@ input[type="text"]:focus { border-color: var(--gold); }
   box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7);
 }
 .letter-paper {
-  padding: 32px 30px 26px;
+  padding: 26px 28px 24px;
   text-align: center;
 }
 .letter-paper h2 {
@@ -542,6 +526,136 @@ input[type="text"]:focus { border-color: var(--gold); }
   color: var(--ink);
   white-space: pre-line;
   margin-bottom: 22px;
+}
+
+/* ---------- Galeri Kenangan Bergerak di Atas Ucapan Ulang Tahun ---------- */
+.letter-memories {
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--gold-soft);
+}
+
+.slide-stage {
+  position: relative;
+  width: 100%;
+  height: 220px;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid var(--gold);
+  background: #0c0907;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
+}
+
+.slide-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transform: scale(1.0);
+  transition: opacity 0.75s ease, transform 2.8s ease-out;
+}
+.slide-img.active {
+  opacity: 1;
+  transform: scale(1.06);
+}
+
+.slide-caption {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 26px 14px 10px;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0), rgba(8, 6, 4, 0.88));
+  text-align: left;
+}
+.slide-year {
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--gold);
+  color: #1a120b;
+  font: 600 11px 'Inter', sans-serif;
+  letter-spacing: 0.08em;
+}
+.slide-meta {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.slide-meta strong {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 19px;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.slide-meta small {
+  font-size: 11px;
+  color: var(--muted);
+}
+.slide-counter {
+  font-size: 11px;
+  color: var(--gold);
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid var(--gold-soft);
+}
+
+/* Filmstrip bergulir terus-menerus */
+.filmstrip-wrap {
+  margin-top: 10px;
+  overflow: hidden;
+  border-radius: 10px;
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+.filmstrip-track {
+  display: flex;
+  gap: 8px;
+  width: max-content;
+  animation: filmScroll 55s linear infinite;
+}
+.filmstrip-track:hover {
+  animation-play-state: paused;
+}
+@keyframes filmScroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.film-thumb {
+  position: relative;
+  width: 84px;
+  height: 58px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--gold-soft);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: transform 0.2s, border-color 0.2s;
+}
+.film-thumb:hover, .film-thumb.current {
+  border-color: var(--gold);
+  transform: translateY(-2px);
+}
+.film-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.film-thumb span {
+  position: absolute;
+  left: 4px; bottom: 3px;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: rgba(10, 8, 6, 0.78);
+  color: var(--gold);
+  font-size: 9px;
+  font-weight: 600;
 }
 
 /* ---------- Responsif untuk layar pendek (mobile landscape) ---------- */

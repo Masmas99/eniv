@@ -229,12 +229,16 @@ export function buildWorld(scene, { rooms, birthday, aniso = 4, lowSpec = false,
     layout(2.2, 1.65);
 
     const art = {
-      index, mem, seg, group, canvas, requested: false, loadedURL: null,
+      index, mem, seg, group, canvas, paintMat, x, z, requested: false, loadedURL: null,
       // Foto asli dimuat malas (lazy) hanya saat pemain dekat ruangannya
       ensureLoaded() {
         if (art.requested || !mem.image) return;
         art.requested = true;
         textureLoader.load(mem.image, (t) => {
+          if (t.image.width <= 2 && t.image.height <= 2) {
+            t.dispose();
+            return;
+          }
           t.colorSpace = THREE.SRGBColorSpace;
           t.anisotropy = aniso;
           paintMat.map.dispose();
@@ -252,15 +256,6 @@ export function buildWorld(scene, { rooms, birthday, aniso = 4, lowSpec = false,
       normal: new THREE.Vector3(-side, 0, 0),
     };
     artworks.push(art);
-
-    interactables.push({
-      label: () => `Lihat “${mem.title}”`,
-      test: (px, pz) => {
-        const dz = Math.abs(pz - z), dx = Math.abs(px - x);
-        return dz < 1.7 && dx < 3.4 ? dz + dx * 0.3 : Infinity;
-      },
-      action: () => handlers.openMemory?.(index),
-    });
   }
 
   function buildRoomContent(s) {
@@ -357,9 +352,27 @@ export function buildWorld(scene, { rooms, birthday, aniso = 4, lowSpec = false,
     const endText = textPlane([
       { text: 'Selamat Ulang Tahun', size: 120, weight: 600, color: '#ffd27f', y: 95 },
       { text: `${birthday.herName} · ${birthday.date}`, size: 62, italic: true, color: '#f1e4cc', y: 205 },
-    ], 9, 2.25);
-    endText.position.set(0, 3.7, END_Z + 0.03);
+    ], 8.2, 2.05);
+    endText.position.set(0, 2.35, END_Z + 0.03);
     scene.add(endText);
+
+    // Galeri layar kenangan 3D di atas ucapan "Selamat Ulang Tahun" (aktif setelah tiup lilin)
+    const wallGallery = new THREE.Group();
+    wallGallery.position.set(0, 4.05, END_Z + 0.05);
+    wallGallery.visible = false;
+    scene.add(wallGallery);
+
+    const screenSlots = [-2.5, 0, 2.5].map((sx, idx) => {
+      const slot = new THREE.Group();
+      slot.position.set(sx, 0, 0);
+      const border = new THREE.Mesh(new THREE.BoxGeometry(2.18, 1.66, 0.04), trimGold);
+      const screenMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+      const screen = new THREE.Mesh(new THREE.PlaneGeometry(2.0, 1.5), screenMat);
+      screen.position.z = 0.025;
+      slot.add(border, screen);
+      wallGallery.add(slot);
+      return { slot, screenMat, offset: idx * 10 };
+    });
 
     const g = new THREE.Group();
     g.position.set(0, 0, cz);
@@ -403,10 +416,26 @@ export function buildWorld(scene, { rooms, birthday, aniso = 4, lowSpec = false,
     });
     addBoxCollider(0, cz, 0.95, 0.95);
 
+    let slideStep = -1;
     animated.push((dt, t) => {
-      if (cake.blown) return;
-      flames.forEach((f, i) => { const k = 1 + Math.sin(t * 18 + i * 2) * 0.12; f.scale.set(0.14 * k, 0.22 * k, 1); });
-      candleLight.intensity = 6 + Math.sin(t * 13) * 1.2;
+      if (!cake.blown) {
+        flames.forEach((f, i) => { const k = 1 + Math.sin(t * 18 + i * 2) * 0.12; f.scale.set(0.14 * k, 0.22 * k, 1); });
+        candleLight.intensity = 6 + Math.sin(t * 13) * 1.2;
+      } else if (artworks.length > 0) {
+        const step = Math.floor(t / 2.2);
+        if (step !== slideStep) {
+          slideStep = step;
+          screenSlots.forEach((sl) => {
+            const art = artworks[(step + sl.offset) % artworks.length];
+            art.ensureLoaded();
+            sl.screenMat.map = art.paintMat.map;
+            sl.screenMat.needsUpdate = true;
+          });
+        }
+        screenSlots.forEach((sl, i) => {
+          sl.slot.position.y = Math.sin(t * 1.6 + i * 1.3) * 0.04;
+        });
+      }
     });
 
     cake.blow = () => {
@@ -414,6 +443,7 @@ export function buildWorld(scene, { rooms, birthday, aniso = 4, lowSpec = false,
       cake.blown = true;
       flames.forEach((f) => (f.visible = false));
       candleLight.intensity = 0;
+      wallGallery.visible = true;
       spawnConfetti(0, 1.8, cz);
     };
 

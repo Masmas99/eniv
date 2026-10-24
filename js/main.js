@@ -71,6 +71,14 @@ const ui = {
   memBack: $('memBack'),
   letterModal: $('letterModal'),
   letterClose: $('letterClose'),
+  letterMemories: $('letterMemories'),
+  slideImgA: $('slideImgA'),
+  slideImgB: $('slideImgB'),
+  slideYear: $('slideYear'),
+  slideTitle: $('slideTitle'),
+  slideDate: $('slideDate'),
+  slideCounter: $('slideCounter'),
+  filmstripTrack: $('filmstripTrack'),
   letterEyebrow: $('letterEyebrow'),
   letterTitle: $('letterTitle'),
   letterBody: $('letterBody'),
@@ -302,7 +310,15 @@ function updateProximity() {
     showRoomBanner(seg);
   }
 
-  // Cari objek interaktif terdekat
+  // Tandai kenangan sudah dilihat saat pemain berjalan mendekati bingkai di dinding
+  for (const art of world.artworks) {
+    if (!seen.has(art.index) && Math.abs(pz - art.z) < 2.2 && Math.abs(px - art.x) < 4.5) {
+      seen.add(art.index);
+      ui.seenCount.textContent = seen.size;
+    }
+  }
+
+  // Cari objek interaktif terdekat (buku tamu & kue ulang tahun)
   let best = null, bestScore = Infinity;
   for (const it of world.interactables) {
     const sc = it.test(px, pz);
@@ -354,11 +370,7 @@ function showMemory(idx) {
   const fallback = (art.fallbackURL ||= art.canvas.toDataURL('image/jpeg', 0.88));
   ui.memImg.src = art.loadedURL || mem.image || fallback;
   ui.memImg.onerror = () => { ui.memImg.src = fallback; };
-  ui.memImg.alt = mem.title;
-  ui.memIndex.textContent = `Ruang ${art.seg.year} · Kenangan ${currentMem + 1} dari ${n}`;
-  ui.memTitle.textContent = mem.title;
-  ui.memDate.textContent = mem.date;
-  ui.memDesc.textContent = mem.description;
+  ui.memImg.alt = '';
   seen.add(currentMem);
   ui.seenCount.textContent = seen.size;
 }
@@ -389,11 +401,92 @@ ui.memBack.addEventListener('click', closeMemoryModal);
 ui.prevBtn.addEventListener('click', () => showMemory(currentMem - 1));
 ui.nextBtn.addEventListener('click', () => showMemory(currentMem + 1));
 
+/* ==========================================================
+ *  SLIDESHOW & FILMSTRIP KENANGAN 2024–2026 DI ATAS UCAPAN ULANG TAHUN
+ * ========================================================== */
+let slideTimer = null;
+let slideIdx = 0;
+let activeSlideLayer = 0;
+let filmstripBuilt = false;
+
+function getArtworkImageSrc(art) {
+  art.ensureLoaded();
+  return art.loadedURL || (art.fallbackURL ||= art.canvas.toDataURL('image/jpeg', 0.88));
+}
+
+function buildFilmstripOnce() {
+  if (filmstripBuilt) return;
+  filmstripBuilt = true;
+  ui.filmstripTrack.innerHTML = '';
+  // Duplikasi 2x agar marquee CSS mengalir tanpa putus
+  const list = [...world.artworks, ...world.artworks];
+  list.forEach((art) => {
+    const item = document.createElement('div');
+    item.className = 'film-thumb';
+    item.dataset.idx = art.index;
+    const img = document.createElement('img');
+    art.ensureLoaded();
+    const fallback = (art.fallbackURL ||= art.canvas.toDataURL('image/jpeg', 0.85));
+    img.src = art.loadedURL || art.mem.image || fallback;
+    img.onerror = () => { img.src = fallback; };
+    img.alt = art.mem.title;
+    const badge = document.createElement('span');
+    badge.textContent = art.seg.year;
+    item.append(img, badge);
+    item.addEventListener('click', () => {
+      showBirthdaySlide(art.index);
+      restartSlideTimer();
+    });
+    ui.filmstripTrack.appendChild(item);
+  });
+}
+
+function showBirthdaySlide(idx) {
+  const n = world.artworks.length;
+  if (!n) return;
+  slideIdx = ((idx % n) + n) % n;
+  const art = world.artworks[slideIdx];
+  const fallback = (art.fallbackURL ||= art.canvas.toDataURL('image/jpeg', 0.88));
+  art.ensureLoaded();
+  const src = art.loadedURL || art.mem.image || fallback;
+
+  const nextImg = activeSlideLayer === 0 ? ui.slideImgB : ui.slideImgA;
+  const prevImg = activeSlideLayer === 0 ? ui.slideImgA : ui.slideImgB;
+  activeSlideLayer = 1 - activeSlideLayer;
+
+  nextImg.onerror = () => { nextImg.src = fallback; };
+  nextImg.src = src;
+  nextImg.classList.add('active');
+  prevImg.classList.remove('active');
+}
+
+function restartSlideTimer() {
+  clearInterval(slideTimer);
+  slideTimer = setInterval(() => showBirthdaySlide(slideIdx + 1), 2400);
+}
+
+function stopSlideTimer() {
+  clearInterval(slideTimer);
+  slideTimer = null;
+}
+
 function openLetterModal(kind) {
-  const data = kind === 'birthday' ? BIRTHDAY.letter : BIRTHDAY.welcome;
-  ui.letterEyebrow.textContent = kind === 'birthday' ? BIRTHDAY.date : 'Pesan Pembuka';
+  const isBirthday = kind === 'birthday';
+  const data = isBirthday ? BIRTHDAY.letter : BIRTHDAY.welcome;
+  ui.letterEyebrow.textContent = isBirthday ? BIRTHDAY.date : 'Pesan Pembuka';
   ui.letterTitle.textContent = data.title;
   ui.letterBody.textContent = data.body;
+
+  if (isBirthday) {
+    buildFilmstripOnce();
+    ui.letterMemories.classList.remove('hidden');
+    showBirthdaySlide(0);
+    restartSlideTimer();
+  } else {
+    ui.letterMemories.classList.add('hidden');
+    stopSlideTimer();
+  }
+
   input.enabled = false;
   input.reset();
   ui.letterModal.classList.remove('hidden');
@@ -401,6 +494,7 @@ function openLetterModal(kind) {
 }
 
 function closeLetterModal() {
+  stopSlideTimer();
   ui.letterModal.classList.add('hidden');
   input.enabled = true;
 }
