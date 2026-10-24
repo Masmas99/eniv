@@ -1,0 +1,565 @@
+:root {
+  --gold: #d8b26a;
+  --gold-soft: rgba(216, 178, 106, 0.35);
+  --rose: #ff7aa2;
+  --ink: #f4ede1;
+  --muted: #b9ad9b;
+  --bg: rgba(16, 12, 10, 0.88);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #0b0908;
+  color: var(--ink);
+  font-family: 'Inter', system-ui, sans-serif;
+  touch-action: none;
+}
+
+canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.hidden { display: none !important; }
+
+#ytPlayer {
+  position: fixed;
+  left: -9999px;
+  bottom: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ---------- Peringatan Landscape di HP Portrait ---------- */
+#rotateNotice {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: #0b0908;
+  align-items: center;
+  justify-content: center;
+  padding: 28px;
+  text-align: center;
+}
+.rotate-box { max-width: 320px; }
+.phone-icon {
+  font-size: 52px;
+  margin-bottom: 14px;
+  animation: tilt 1.8s ease-in-out infinite alternate;
+}
+@keyframes tilt { from { transform: rotate(0deg); } to { transform: rotate(-90deg); } }
+.rotate-box h2 {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 30px;
+  color: var(--gold);
+  margin-bottom: 8px;
+}
+.rotate-box p { color: var(--muted); font-size: 14px; line-height: 1.6; }
+
+@media (max-width: 920px) and (orientation: portrait) {
+  #rotateNotice { display: flex; }
+}
+
+/* ---------- Overlay umum ---------- */
+.overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  z-index: 20;
+  padding: 16px;
+  background: radial-gradient(ellipse at center, rgba(22, 16, 13, 0.76), rgba(6, 4, 3, 0.94));
+  backdrop-filter: blur(6px);
+  animation: fadeIn 0.35s ease;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* ---------- Loading ---------- */
+#loading { z-index: 40; gap: 16px; background: #0b0908; }
+#loading p { color: var(--muted); letter-spacing: 0.08em; font-size: 13px; }
+.loader {
+  width: 42px; height: 42px;
+  border: 2px solid var(--gold-soft);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---------- Menu / Lobby ---------- */
+.menu-card {
+  width: min(560px, 100%);
+  max-height: 94vh;
+  overflow-y: auto;
+  text-align: center;
+  padding: 28px 28px 22px;
+  background: var(--bg);
+  border: 1px solid var(--gold-soft);
+  border-radius: 18px;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.65);
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  font-size: 11px;
+  color: var(--gold);
+}
+
+.menu-card h1 {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-weight: 600;
+  font-size: clamp(34px, 6vw, 56px);
+  line-height: 1.05;
+  margin: 6px 0 4px;
+  background: linear-gradient(180deg, #fff3d6, var(--gold));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.subtitle {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-style: italic;
+  font-size: 18px;
+  color: var(--muted);
+  margin-bottom: 18px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  text-align: left;
+  margin-bottom: 14px;
+}
+
+.field label, .mode-panel label {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+input[type="text"] {
+  user-select: text;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--gold-soft);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--ink);
+  font: 500 14px 'Inter', sans-serif;
+  outline: none;
+}
+input[type="text"]:focus { border-color: var(--gold); }
+
+#codeInput {
+  text-align: center;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  font-size: 18px;
+  max-width: 220px;
+  margin: 0 auto;
+  display: block;
+}
+
+.char-select {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.char-btn {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--gold-soft);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--muted);
+  font: 500 13px 'Inter', sans-serif;
+  transition: all 0.18s;
+}
+.char-btn .avatar { font-size: 18px; }
+.char-btn.active {
+  border-color: var(--gold);
+  background: rgba(216, 178, 106, 0.16);
+  color: var(--ink);
+}
+
+.mode-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 5px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  margin-bottom: 12px;
+}
+.tab-btn {
+  cursor: pointer;
+  padding: 8px 6px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font: 500 12px 'Inter', sans-serif;
+  transition: all 0.18s;
+}
+.tab-btn.active {
+  background: rgba(216, 178, 106, 0.22);
+  color: var(--gold);
+}
+
+.mode-panel { margin-bottom: 12px; }
+.hint { font-size: 12px; color: var(--muted); line-height: 1.5; }
+.error {
+  color: #ff8080;
+  font-size: 12px;
+  margin-bottom: 10px;
+}
+
+.btn-primary {
+  cursor: pointer;
+  font: 600 13px 'Inter', sans-serif;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #1a130c;
+  background: linear-gradient(180deg, #f3dca8, var(--gold));
+  border: none;
+  padding: 13px 32px;
+  border-radius: 999px;
+  box-shadow: 0 8px 26px rgba(216, 178, 106, 0.28);
+  transition: transform 0.18s, opacity 0.18s;
+}
+.btn-primary:hover { transform: translateY(-1px); }
+.btn-primary:disabled { opacity: 0.5; cursor: wait; }
+
+.controls-mini {
+  margin-top: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px 16px;
+  font-size: 11px;
+  color: var(--muted);
+}
+.controls-mini b { color: var(--gold); font-weight: 500; }
+
+/* ---------- HUD ---------- */
+#hud {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.hud-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: max(12px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left));
+}
+
+.hud-pill {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 13px;
+  border-radius: 999px;
+  background: rgba(10, 8, 6, 0.65);
+  border: 1px solid var(--gold-soft);
+  backdrop-filter: blur(4px);
+  font-size: 12px;
+  color: var(--ink);
+}
+.hud-pill b { color: var(--gold); font-weight: 600; }
+.hud-pill.clickable { cursor: pointer; }
+.hud-pill .dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--gold);
+}
+.peer-status {
+  padding-left: 6px;
+  border-left: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--muted);
+  font-size: 11px;
+}
+.peer-status.online { color: #7fe7a2; }
+
+.hud-actions {
+  pointer-events: auto;
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
+.icon-btn {
+  cursor: pointer;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--gold-soft);
+  background: rgba(10, 8, 6, 0.65);
+  color: var(--ink);
+  font-size: 15px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s, background 0.15s;
+}
+.icon-btn:active, .icon-btn:hover {
+  background: rgba(216, 178, 106, 0.22);
+  transform: scale(1.06);
+}
+#heartBtn { color: var(--rose); }
+
+/* Banner nama ruangan */
+#roomBanner {
+  position: fixed;
+  top: 64px;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  padding: 10px 26px 12px;
+  border-radius: 16px;
+  background: rgba(10, 8, 6, 0.72);
+  border: 1px solid var(--gold-soft);
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.35s ease;
+}
+#roomBanner h2 {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 26px;
+  font-weight: 600;
+  color: var(--ink);
+}
+#roomBanner p:last-child {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-style: italic;
+  font-size: 15px;
+  color: var(--muted);
+}
+
+/* Toast */
+#toast {
+  position: fixed;
+  top: 64px;
+  right: 18px;
+  padding: 9px 16px;
+  border-radius: 999px;
+  background: rgba(14, 11, 9, 0.88);
+  border: 1px solid var(--gold);
+  font-size: 12px;
+  color: var(--ink);
+  animation: fadeIn 0.25s ease;
+}
+
+/* Tombol interaksi */
+#actionBtn {
+  pointer-events: auto;
+  cursor: pointer;
+  position: fixed;
+  left: 50%;
+  bottom: max(22px, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 22px;
+  border-radius: 999px;
+  border: 1px solid var(--gold);
+  background: linear-gradient(180deg, rgba(40, 28, 18, 0.94), rgba(18, 12, 8, 0.94));
+  color: var(--ink);
+  font: 500 14px 'Inter', sans-serif;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
+  animation: pulse 1.8s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 10px 30px rgba(216, 178, 106, 0.22); }
+  50% { box-shadow: 0 10px 34px rgba(216, 178, 106, 0.48); }
+}
+#actionBtn kbd {
+  font-size: 11px;
+  padding: 2px 7px;
+  border-radius: 5px;
+  background: rgba(216, 178, 106, 0.2);
+  border: 1px solid var(--gold-soft);
+  color: var(--gold);
+}
+
+/* Joystick */
+#joyBase {
+  position: fixed;
+  width: 110px; height: 110px;
+  margin: -55px 0 0 -55px;
+  border-radius: 50%;
+  border: 1.5px solid var(--gold-soft);
+  background: rgba(255, 255, 255, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#joyKnob {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: rgba(216, 178, 106, 0.65);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+
+/* ---------- Modal Kenangan ---------- */
+.modal-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1.25fr 1fr;
+  width: min(980px, 100%);
+  max-height: 90vh;
+  background: var(--bg);
+  border: 1px solid var(--gold-soft);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.65);
+}
+.modal-image {
+  background: #050403;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 220px;
+}
+.modal-image img {
+  width: 100%;
+  height: 100%;
+  max-height: 90vh;
+  object-fit: contain;
+}
+.modal-text {
+  padding: 28px 26px 22px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+.modal-text h2 {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-weight: 600;
+  font-size: clamp(26px, 3.6vw, 38px);
+  line-height: 1.1;
+  margin: 8px 0 4px;
+}
+.modal-text .date {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-style: italic;
+  color: var(--gold);
+  font-size: 18px;
+  margin-bottom: 14px;
+}
+.modal-text .desc {
+  color: var(--muted);
+  line-height: 1.75;
+  font-size: 14px;
+  font-weight: 300;
+  flex: 1;
+  white-space: pre-line;
+}
+.modal-text .nav {
+  display: flex;
+  gap: 8px;
+  margin: 18px 0 10px;
+}
+.modal-text .nav button {
+  cursor: pointer;
+  flex: 1;
+  padding: 9px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--gold-soft);
+  background: transparent;
+  color: var(--ink);
+  font: 400 12px 'Inter', sans-serif;
+}
+.modal-text .nav button:hover { background: rgba(216, 178, 106, 0.14); }
+
+.close {
+  position: absolute;
+  top: 10px; right: 14px;
+  z-index: 2;
+  cursor: pointer;
+  font-size: 28px;
+  line-height: 1;
+  background: none;
+  border: none;
+  color: var(--muted);
+}
+.close:hover { color: var(--ink); }
+
+/* ---------- Modal Surat ---------- */
+.letter-card {
+  position: relative;
+  width: min(560px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #241b15, #17110d);
+  border: 1px solid var(--gold);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7);
+}
+.letter-paper {
+  padding: 32px 30px 26px;
+  text-align: center;
+}
+.letter-paper h2 {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(28px, 4vw, 40px);
+  color: var(--gold);
+  margin: 8px 0 16px;
+}
+.letter-body {
+  text-align: left;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 20px;
+  line-height: 1.65;
+  color: var(--ink);
+  white-space: pre-line;
+  margin-bottom: 22px;
+}
+
+/* ---------- Responsif untuk layar pendek (mobile landscape) ---------- */
+@media (max-height: 500px) {
+  .menu-card {
+    padding: 14px 20px;
+    max-width: 640px;
+  }
+  .menu-card h1 { font-size: 30px; margin: 2px 0; }
+  .subtitle { font-size: 14px; margin-bottom: 10px; }
+  .form-row { margin-bottom: 8px; gap: 10px; }
+  .mode-tabs { margin-bottom: 8px; }
+  .btn-primary { padding: 10px 24px; font-size: 12px; }
+  .controls-mini { display: none; }
+  #roomBanner { top: 52px; padding: 6px 18px; }
+  #roomBanner h2 { font-size: 20px; }
+  #actionBtn kbd { display: none; }
+  .modal-text { padding: 16px 18px; }
+  .letter-paper { padding: 20px 22px; }
+  .letter-body { font-size: 17px; }
+}

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0908" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <title>Museum Kenangan Kita</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <!-- Peringatan wajib landscape di HP portrait -->
+  <div id="rotateNotice">
+    <div class="rotate-box">
+      <div class="phone-icon">📱↻</div>
+      <h2>Putar HP-mu ke Landscape</h2>
+      <p>Museum ini dirancang untuk tampilan mendatar (landscape) agar nyaman dijelajahi berdua.</p>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div id="loading" class="overlay">
+    <div class="loader"></div>
+    <p>Menyiapkan ruang kenangan…</p>
+  </div>
+
+  <!-- Menu Mulai / Lobby -->
+  <div id="menu" class="overlay hidden">
+    <div class="menu-card">
+      <p class="eyebrow">Edisi Spesial Ulang Tahun</p>
+      <h1>Museum Kenangan</h1>
+      <p class="subtitle">Perjalanan cerita kita · 2024 – 2026</p>
+
+      <div class="form-row">
+        <div class="field">
+          <label for="nameInput">Nama panggilanmu</label>
+          <input id="nameInput" type="text" maxlength="14" placeholder="Misal: Aku / Sayang" autocomplete="off" />
+        </div>
+        <div class="field">
+          <label>Pilih karakter</label>
+          <div class="char-select">
+            <button type="button" class="char-btn active" data-gender="cowo">
+              <span class="avatar cowo">👦</span>
+              <span>Cowo</span>
+            </button>
+            <button type="button" class="char-btn" data-gender="cewe">
+              <span class="avatar cewe">👧</span>
+              <span>Cewe</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="mode-tabs">
+        <button type="button" class="tab-btn active" data-mode="solo">Jalan Sendiri</button>
+        <button type="button" class="tab-btn" data-mode="host">Buat Room Berdua</button>
+        <button type="button" class="tab-btn" data-mode="join">Gabung Room</button>
+      </div>
+
+      <div id="panelJoin" class="mode-panel hidden">
+        <label for="codeInput">Masukkan 5 huruf kode room dari pasanganmu</label>
+        <input id="codeInput" type="text" maxlength="5" placeholder="ABCDE" autocomplete="off" />
+      </div>
+
+      <div id="panelHost" class="mode-panel hidden">
+        <p class="hint">Kamu akan mendapat kode 5 huruf untuk dibagikan ke pasanganmu setelah masuk museum.</p>
+      </div>
+
+      <p id="menuError" class="error hidden"></p>
+
+      <button id="startBtn" class="btn-primary">Masuk Museum</button>
+
+      <div class="controls-mini">
+        <span><b>WASD / Joystick Kiri:</b> Jalan</span>
+        <span><b>Geser Layar / Mouse:</b> Kamera</span>
+        <span><b>H / ❤:</b> Kirim Hati</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- HUD saat bermain -->
+  <div id="hud" class="hidden">
+    <div class="hud-top">
+      <div class="hud-pill" id="roomPill">
+        <span class="dot"></span>
+        <span id="roomLabel">Lobi</span>
+      </div>
+
+      <div class="hud-pill" id="seenPill">
+        Kenangan: <b id="seenCount">0</b>/<b id="totalCount">0</b>
+      </div>
+
+      <div class="hud-pill clickable hidden" id="codePill" title="Klik untuk salin kode room">
+        Room: <b id="roomCodeText">-----</b> 📋
+        <span class="peer-status" id="peerStatus">Menunggu pasangan…</span>
+      </div>
+
+      <div class="hud-actions">
+        <button type="button" class="icon-btn" id="heartBtn" title="Kirim Hati (H)">❤</button>
+        <button type="button" class="icon-btn" id="musicBtn" title="Musik On/Off (M)">♪</button>
+        <button type="button" class="icon-btn" id="fsBtn" title="Layar Penuh">⛶</button>
+        <button type="button" class="icon-btn" id="menuBtn" title="Menu">☰</button>
+      </div>
+    </div>
+
+    <!-- Banner nama ruangan saat pindah ruangan -->
+    <div id="roomBanner" class="hidden">
+      <p class="eyebrow" id="bannerYear"></p>
+      <h2 id="bannerTitle"></h2>
+      <p id="bannerSub"></p>
+    </div>
+
+    <!-- Toast notifikasi kecil -->
+    <div id="toast" class="hidden"></div>
+
+    <!-- Tombol aksi (buka lukisan / tiup lilin / baca surat) -->
+    <button type="button" id="actionBtn" class="hidden">
+      <span id="actionText">Lihat Kenangan</span>
+      <kbd>E</kbd>
+    </button>
+
+    <!-- Joystick virtual (mobile) -->
+    <div id="joyBase" class="hidden">
+      <div id="joyKnob"></div>
+    </div>
+  </div>
+
+  <!-- Modal detail kenangan (lukisan) -->
+  <div id="memoryModal" class="overlay hidden">
+    <div class="modal-card">
+      <button type="button" class="close" id="memClose" aria-label="Tutup">&times;</button>
+      <div class="modal-image">
+        <img id="memImg" alt="" />
+      </div>
+      <div class="modal-text">
+        <p class="eyebrow" id="memIndex"></p>
+        <h2 id="memTitle"></h2>
+        <p class="date" id="memDate"></p>
+        <p class="desc" id="memDesc"></p>
+        <div class="nav">
+          <button type="button" id="prevBtn">&larr; Sebelumnya</button>
+          <button type="button" id="nextBtn">Berikutnya &rarr;</button>
+        </div>
+        <button type="button" id="memBack" class="btn-primary">Kembali Berjalan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal surat sambutan / ulang tahun -->
+  <div id="letterModal" class="overlay hidden">
+    <div class="letter-card">
+      <button type="button" class="close" id="letterClose" aria-label="Tutup">&times;</button>
+      <div class="letter-paper">
+        <p class="eyebrow" id="letterEyebrow">Untuk Kamu</p>
+        <h2 id="letterTitle"></h2>
+        <div class="letter-body" id="letterBody"></div>
+        <button type="button" id="letterBack" class="btn-primary">Tutup Surat ❤</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pemutar musik YouTube tersembunyi -->
+  <div id="ytPlayer"></div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
