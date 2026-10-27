@@ -18,7 +18,7 @@ const DOOR_W = 3.2;
 const DOOR_H = 3.6;
 const WALL_T = 0.4;
 const STEP = 2.75;      // jarak antar-bingkai (selang-seling kiri/kanan)
-const ART_Y = 2.15;     // tinggi tengah bingkai
+const ART_Y = 2.3;      // tinggi tengah bingkai
 const LOBBY_L = 14;
 
 export function buildWorld(scene, { rooms, birthday, aniso = 4, lowSpec = false, handlers = {} }) {
@@ -83,7 +83,7 @@ export function buildWorld(scene, { rooms, birthday, aniso = 4, lowSpec = false,
   // List dinding sepanjang museum
   const trimDark = new THREE.MeshLambertMaterial({ color: 0x1c1410 });
   const trimGold = new THREE.MeshPhongMaterial({ color: 0xb48a42, specular: 0x886633, shininess: 50 });
-  [[0.11, 0.22, 0.06, trimDark], [1.0, 0.05, 0.04, trimGold], [ROOM_H - 0.12, 0.24, 0.08, trimDark]].forEach(([y, h, d, m]) => {
+  [[0.11, 0.22, 0.06, trimDark], [0.48, 0.04, 0.03, trimGold], [ROOM_H - 0.12, 0.24, 0.08, trimDark]].forEach(([y, h, d, m]) => {
     const g = new THREE.BoxGeometry(d, h, TOTAL_L);
     [-1, 1].forEach((sd) => {
       const t = new THREE.Mesh(g, m);
@@ -95,10 +95,13 @@ export function buildWorld(scene, { rooms, birthday, aniso = 4, lowSpec = false,
   /* ---------- Helper ---------- */
   function textPlane(lines, w, h, cw = 1024, ch = 256) {
     const tex = TX.toTexture(TX.textCanvas(lines, cw, ch), 1, 1, aniso);
-    return new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false }));
+    return new THREE.Mesh(
+      new THREE.PlaneGeometry(w, h),
+      new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 })
+    );
   }
-  function onSideWall(mesh, side, y, z) {
-    mesh.position.set(side * (HALF_W - 0.03), y, z);
+  function onSideWall(mesh, side, y, z, offset = 0.04) {
+    mesh.position.set(side * (HALF_W - offset), y, z);
     mesh.rotation.y = side < 0 ? Math.PI / 2 : -Math.PI / 2;
     scene.add(mesh);
     return mesh;
@@ -125,13 +128,16 @@ export function buildWorld(scene, { rooms, birthday, aniso = 4, lowSpec = false,
     const geo = new THREE.PlaneGeometry(s.len, ROOM_H);
     [-1, 1].forEach((sd) => {
       const w = new THREE.Mesh(geo, mat);
-      onSideWall(w, sd, ROOM_H / 2, (s.z0 + s.z1) / 2);
+      onSideWall(w, sd, ROOM_H / 2, (s.z0 + s.z1) / 2, 0);
       walls.push(w);
     });
 
-    const rug = new THREE.Mesh(new THREE.PlaneGeometry(3, s.len - 2), new THREE.MeshLambertMaterial({ color: s.theme.rug }));
+    const rug = new THREE.Mesh(
+      new THREE.PlaneGeometry(3, s.len - 2),
+      new THREE.MeshLambertMaterial({ color: s.theme.rug, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 })
+    );
     rug.rotation.x = -Math.PI / 2;
-    rug.position.set(0, 0.006, (s.z0 + s.z1) / 2);
+    rug.position.set(0, 0.01, (s.z0 + s.z1) / 2);
     scene.add(rug);
 
     if (s.index > 0) buildDivider(s);
@@ -180,10 +186,10 @@ export function buildWorld(scene, { rooms, birthday, aniso = 4, lowSpec = false,
     top.position.set(0, DOOR_H + 0.07, z);
     scene.add(top);
 
-    // Papan nama ruangan (menghadap ruangan sebelumnya)
+    // Papan di atas pintu: Selamat Ulang Tahun Fitri
     const sign = textPlane([
-      { text: s.year, size: 150, weight: 600, color: s.theme.accent, y: 98 },
-      { text: s.title, size: 56, italic: true, color: '#e9dcc4', y: 210 },
+      { text: 'Selamat Ulang Tahun', size: 88, weight: 600, color: s.theme.accent, y: 105 },
+      { text: `${birthday.herName} ❤`, size: 74, italic: true, color: '#e9dcc4', y: 198 },
     ], 5.6, 1.4);
     sign.position.set(0, DOOR_H + (ROOM_H - DOOR_H) / 2, z + WALL_T / 2 + 0.01);
     scene.add(sign);
@@ -204,9 +210,12 @@ export function buildWorld(scene, { rooms, birthday, aniso = 4, lowSpec = false,
     const board = new THREE.Mesh(unitBox, boardMat);
     const bars = Array.from({ length: 4 }, () => new THREE.Mesh(unitBox, frameMat));
     const glow = new THREE.Mesh(glowGeo, glowMat);
-    glow.position.set(0, 0.35, 0.008);
-    const plaque = new THREE.Mesh(plaqueGeo, new THREE.MeshLambertMaterial({
+    glow.position.set(0, 0.35, 0.012);
+    const plaque = new THREE.Mesh(plaqueGeo, new THREE.MeshBasicMaterial({
       map: TX.toTexture(TX.plaqueCanvas(mem, `${seg.year} · No. ${String(localIdx + 1).padStart(2, '0')}`), 1, 1, aniso),
+      polygonOffset: true,
+      polygonOffsetFactor: -2,
+      polygonOffsetUnits: -2,
     }));
     const fixture = new THREE.Mesh(fixtureGeo, fixtureMat);
     fixture.position.set(0, ROOM_H - ART_Y - 0.35, 0.6);
@@ -216,15 +225,15 @@ export function buildWorld(scene, { rooms, birthday, aniso = 4, lowSpec = false,
     const T = 0.11, D = 0.09, M = 0.16;
     function layout(w, h) {
       painting.scale.set(w, h, 1);
-      painting.position.z = 0.052;
+      painting.position.z = 0.056;
       const bw = w + M * 2, bh = h + M * 2;
       board.scale.set(bw, bh, 0.05);
-      board.position.z = 0.025;
+      board.position.z = 0.028;
       bars[0].scale.set(bw + T * 2, T, D); bars[0].position.set(0, bh / 2 + T / 2, D / 2);
       bars[1].scale.set(bw + T * 2, T, D); bars[1].position.set(0, -bh / 2 - T / 2, D / 2);
       bars[2].scale.set(T, bh, D); bars[2].position.set(-bw / 2 - T / 2, 0, D / 2);
       bars[3].scale.set(T, bh, D); bars[3].position.set(bw / 2 + T / 2, 0, D / 2);
-      plaque.position.set(0, -bh / 2 - T - 0.3, 0.01);
+      plaque.position.set(0, -bh / 2 - T - 0.26, 0.035);
     }
     layout(2.2, 1.65);
 
@@ -234,7 +243,8 @@ export function buildWorld(scene, { rooms, birthday, aniso = 4, lowSpec = false,
       ensureLoaded() {
         if (art.requested || !mem.image) return;
         art.requested = true;
-        textureLoader.load(mem.image, (t) => {
+        const url = `${mem.image}?v=20261028`;
+        textureLoader.load(url, (t) => {
           if (t.image.width <= 2 && t.image.height <= 2) {
             t.dispose();
             return;
@@ -244,7 +254,7 @@ export function buildWorld(scene, { rooms, birthday, aniso = 4, lowSpec = false,
           paintMat.map.dispose();
           paintMat.map = t;
           paintMat.needsUpdate = true;
-          art.loadedURL = mem.image;
+          art.loadedURL = url;
           const a = t.image.width / t.image.height;
           let w = 2.2, h = w / a;
           if (h > 1.9) { h = 1.9; w = h * a; }
@@ -277,8 +287,8 @@ export function buildWorld(scene, { rooms, birthday, aniso = 4, lowSpec = false,
     ], 7, 1.75), -1, 3.3, mid);
 
     onSideWall(textPlane([
-      { text: 'Museum Kenangan Kita', size: 104, weight: 600, color: '#d8b26a', y: 100 },
-      { text: `${rooms[0]?.year || ''} — ${rooms[rooms.length - 1]?.year || ''}`, size: 66, italic: true, color: '#f1e4cc', y: 205 },
+      { text: 'Selamat Ulang Tahun', size: 104, weight: 600, color: '#d8b26a', y: 100 },
+      { text: `${birthday.herName} ❤`, size: 72, italic: true, color: '#f1e4cc', y: 205 },
     ], 7, 1.75), 1, 3.3, mid);
 
     const quote = textPlane([
@@ -512,6 +522,9 @@ export function buildWorld(scene, { rooms, birthday, aniso = 4, lowSpec = false,
     for (const s of segs) if (z <= s.z0 && z > s.z1) return s;
     return z > 0 ? segs[0] : segs[segs.length - 1];
   }
+
+  // Muat semua foto dari awal (2024, 2025, 2026) agar langsung tampil tanpa cache lama
+  artworks.forEach((a) => a.ensureLoaded());
 
   let lastSeg = -1;
   function update(dt, t, playerZ) {

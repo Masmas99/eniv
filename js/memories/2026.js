@@ -86,7 +86,7 @@ export const ROOM_2026 = {
     },
     {
       title: 'Selamat Ulang Tahun!',
-      date: '24 Oktober 2026',
+      date: '28 Oktober 2026',
       description: 'Hari ini adalah hari spesialmu. Terus berjalan ke ujung ruangan ini ya — ada kue ulang tahun yang menunggu untuk kamu tiup. 🎂',
       image: 'assets/photos/2026/foto-10.webp',
       icon: '🎁',

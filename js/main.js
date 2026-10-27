@@ -306,8 +306,7 @@ function updateProximity() {
   const seg = world.segmentAt(pz);
   if (seg.index !== currentSegIndex) {
     currentSegIndex = seg.index;
-    ui.roomLabel.textContent = seg.label;
-    showRoomBanner(seg);
+    ui.roomLabel.textContent = `Selamat Ulang Tahun ${BIRTHDAY.herName}`;
   }
 
   // Tandai kenangan sudah dilihat saat pemain berjalan mendekati bingkai di dinding
@@ -368,7 +367,7 @@ function showMemory(idx) {
   art.ensureLoaded();
   const { mem } = art;
   const fallback = (art.fallbackURL ||= art.canvas.toDataURL('image/jpeg', 0.88));
-  ui.memImg.src = art.loadedURL || mem.image || fallback;
+  ui.memImg.src = art.loadedURL || (mem.image ? `${mem.image}?v=20261028` : fallback);
   ui.memImg.onerror = () => { ui.memImg.src = fallback; };
   ui.memImg.alt = '';
   seen.add(currentMem);
@@ -427,7 +426,7 @@ function buildFilmstripOnce() {
     const img = document.createElement('img');
     art.ensureLoaded();
     const fallback = (art.fallbackURL ||= art.canvas.toDataURL('image/jpeg', 0.85));
-    img.src = art.loadedURL || art.mem.image || fallback;
+    img.src = art.loadedURL || (art.mem.image ? `${art.mem.image}?v=20261028` : fallback);
     img.onerror = () => { img.src = fallback; };
     img.alt = art.mem.title;
     const badge = document.createElement('span');
@@ -448,7 +447,7 @@ function showBirthdaySlide(idx) {
   const art = world.artworks[slideIdx];
   const fallback = (art.fallbackURL ||= art.canvas.toDataURL('image/jpeg', 0.88));
   art.ensureLoaded();
-  const src = art.loadedURL || art.mem.image || fallback;
+  const src = art.loadedURL || (art.mem.image ? `${art.mem.image}?v=20261028` : fallback);
 
   const nextImg = activeSlideLayer === 0 ? ui.slideImgB : ui.slideImgA;
   const prevImg = activeSlideLayer === 0 ? ui.slideImgA : ui.slideImgB;
